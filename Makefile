@@ -2,7 +2,7 @@ CC=			gcc
 CFLAGS=		-g -Wall -O2 -Wno-unused-function
 CPPFLAGS=
 INCLUDES=	
-OBJS=		sdg.o
+OBJS=		sdg.o io.o
 PROG=		sdg
 LIBS=		-lm -lz
 
@@ -11,7 +11,7 @@ LIBS=		-lm -lz
 .c.o:
 		$(CC) -c $(CFLAGS) $(CPPFLAGS) $(INCLUDES) $< -o $@
 
-all:sdg.o
+all:sdg.o io.o
 
 clean:
 		rm -fr gmon.out *.o ext/*.o a.out $(PROG) *~ *.a *.dSYM session*

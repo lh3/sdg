@@ -41,6 +41,9 @@ typedef struct {
 	void *hash;
 } sdg_graph_t;
 
+struct sdg_ji_t;
+typedef struct sdg_ji_t sdg_ji_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -54,8 +57,12 @@ extern "C" {
 	sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len);
 	int sdg_g_add_join(sdg_graph_t *g, const sdg_side_t s1, const sdg_side_t s2);
 
-	sdg_jpos_t *sdg_s_add_jpos(sdg_seq_t *s, int64_t sp);
 	sdg_jpos_t *sdg_s_get_jpos(const sdg_seq_t *s, int64_t sp);
+	sdg_jpos_t *sdg_s_add_jpos(sdg_seq_t *s, int64_t sp);
+
+	sdg_ji_t *sdg_ji_first(sdg_seq_t *s);
+	int sdg_ji_next(sdg_ji_t *itr);
+	sdg_jpos_t *sdg_ji_at(sdg_ji_t *itr);
 
 #ifdef __cplusplus
 }
@@ -84,6 +91,13 @@ static inline const sdg_side_t *sdg_j_get_side(const sdg_jpos_t *p, int i)
 {
 	if (p->n_sides == 1 && i == 0) return &p->x.nei;
 	return i > p->n_sides? 0 : &p->x.neis[i];
+}
+
+static inline sdg_jpos_t *sdg_s_geti_jpos(const sdg_seq_t *s, int i)
+{
+	if (s->n_jpos <= SG_TREE_JOINS)
+		return (sdg_jpos_t*)s->jpos + i;
+	return 0;
 }
 
 #endif

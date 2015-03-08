@@ -4,6 +4,10 @@
 #include <zlib.h>
 #include "sdg.h"
 
+/*******************
+ * jpos operations *
+ *******************/
+
 #include "kbtree.h"
 #define join_cmp(a, b) ((a).sp - (b).sp)
 KBTREE_INIT(j, sdg_jpos_t, join_cmp)
@@ -61,6 +65,50 @@ sdg_jpos_t *sdg_s_get_jpos(const sdg_seq_t *s, int64_t sp)
 		return kb_getp(j, t, &tmp);
 	}
 }
+
+/*****************
+ * jpos iterator *
+ *****************/
+
+struct sdg_ji_t {
+	sdg_seq_t *s;
+	kbitr_t itr;
+	int32_t i;
+};
+
+sdg_ji_t *sdg_ji_first(sdg_seq_t *s)
+{
+	sdg_ji_t *itr;
+	itr = calloc(1, sizeof(sdg_ji_t));
+	itr->s = s;
+	if (s->n_jpos > SG_TREE_JOINS) { // s->jpos is a B-tree
+		itr->i = -1;
+		kb_itr_first_j((jtree_t*)s->jpos, &itr->itr);
+	} else itr->i = 0;
+	return itr;
+}
+
+int sdg_ji_next(sdg_ji_t *itr)
+{
+	if (itr->i >= 0) {
+		if (++itr->i >= itr->s->n_jpos)
+			return 0;
+		else return 1;
+	} else return kb_itr_next_j((jtree_t*)itr->s->jpos, &itr->itr);
+}
+
+sdg_jpos_t *sdg_ji_at(sdg_ji_t *itr)
+{
+	if (itr->i >= 0) {
+		if (itr->i >= itr->s->n_jpos) return 0;
+		sdg_jpos_t *a = (sdg_jpos_t*)itr->s->jpos;
+		return &a[itr->i];
+	} else return &kb_itr_key(sdg_jpos_t, &itr->itr);
+}
+
+/********************
+ * Other operations *
+ ********************/
 
 #include "khash.h"
 KHASH_MAP_INIT_STR(n, int64_t)
