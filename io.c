@@ -121,6 +121,7 @@ void sdg_g_write(const sdg_graph_t *g, FILE *out)
 				}
 			}
 		} while (sdg_ji_next(itr));
+		free(itr);
 	}
 	free(str.s);
 }
