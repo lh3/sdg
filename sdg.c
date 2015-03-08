@@ -89,22 +89,22 @@ void sdg_g_destroy(sdg_graph_t *g) // TODO
 	free(g);
 }
 
-int64_t sdg_g_get_seq_id(const sdg_graph_t *g, const char *name)
+sdg_seq_t *sdg_g_get_seq(const sdg_graph_t *g, const char *name)
 {
 	nhash_t *h = (nhash_t*)g->hash;
 	khint_t k;
 	k = kh_get(n, h, name);
-	return k == kh_end(h)? -1 : kh_val(h, k);
+	return k == kh_end(h)? 0 : &g->seqs[kh_val(h, k)];
 }
 
-int64_t sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len)
+sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len)
 {
 	sdg_seq_t *s;
 	nhash_t *h = (nhash_t*)g->hash;
 	khint_t k;
 	int absent;
 	k = kh_put(n, h, name, &absent);
-	if (!absent) return kh_val(h, k); // added before
+	if (!absent) return &g->seqs[kh_val(h, k)]; // added before
 	if (g->n_seqs == g->m_seqs) {
 		g->m_seqs = g->m_seqs? g->m_seqs<<1 : 16;
 		g->seqs = realloc(g->seqs, g->m_seqs * sizeof(sdg_seq_t));
@@ -113,7 +113,7 @@ int64_t sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len)
 	s->len = len;
 	kh_key(h, k) = s->name = strdup(name);
 	kh_val(h, k) = s->id   = g->n_seqs - 1;
-	return s->id;
+	return s;
 }
 
 void sdg_g_add_join1(sdg_graph_t *g, const sdg_side_t s1, const sdg_side_t s2)

@@ -50,8 +50,8 @@ extern "C" {
 	sdg_graph_t *sdg_g_init(void);
 	void sdg_g_destroy(sdg_graph_t *g);
 
-	int64_t sdg_g_get_seq_id(const sdg_graph_t *g, const char *name);
-	int64_t sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len);
+	sdg_seq_t *sdg_g_get_seq(const sdg_graph_t *g, const char *name);
+	sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len);
 	int sdg_g_add_join(sdg_graph_t *g, const sdg_side_t s1, const sdg_side_t s2);
 
 	sdg_join_t *sdg_s_add_side(sdg_seq_t *s, int64_t sp);
