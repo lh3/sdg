@@ -6,57 +6,57 @@
 
 #include "kbtree.h"
 #define join_cmp(a, b) ((a).sp - (b).sp)
-KBTREE_INIT(j, sdg_join_t, join_cmp)
+KBTREE_INIT(j, sdg_jpos_t, join_cmp)
 typedef kbtree_t(j) jtree_t;
 
-sdg_join_t *sdg_s_add_side(sdg_seq_t *s, int64_t sp)
+sdg_jpos_t *sdg_s_add_jpos(sdg_seq_t *s, int64_t sp)
 {
 	uint32_t i;
-	if (s->n_joins < SG_TREE_JOINS) { // then s->p is an array
-		sdg_join_t *a = (sdg_join_t*)s->joins;
-		for (i = 0; i < s->n_joins; ++i)
+	if (s->n_jpos < SG_TREE_JOINS) { // then s->p is an array
+		sdg_jpos_t *a = (sdg_jpos_t*)s->jpos;
+		for (i = 0; i < s->n_jpos; ++i)
 			if (a[i].sp >= sp) break;
-		if (i == s->n_joins || a[i].sp != sp) { // a new side to add
-			if (s->n_joins == s->m_joins) {
-				s->m_joins = s->m_joins? s->m_joins<<1 : 2;
-				s->joins = a = realloc(a, s->m_joins * sizeof(sdg_join_t));
+		if (i == s->n_jpos || a[i].sp != sp) { // a new side to add
+			if (s->n_jpos == s->m_jpos) {
+				s->m_jpos = s->m_jpos? s->m_jpos<<1 : 2;
+				s->jpos = a = realloc(a, s->m_jpos * sizeof(sdg_jpos_t));
 			}
-			if (i < s->n_joins) // make room for insertion
-				memmove(&a[i+1], &a[i], (s->n_joins - i) * sizeof(sdg_join_t));
-			++s->n_joins;
-			memset(&a[i], 0, sizeof(sdg_join_t));
+			if (i < s->n_jpos) // make room for insertion
+				memmove(&a[i+1], &a[i], (s->n_jpos - i) * sizeof(sdg_jpos_t));
+			++s->n_jpos;
+			memset(&a[i], 0, sizeof(sdg_jpos_t));
 		}
 		return &a[i];
 	} else { // then s->p is or will be a tree
 		jtree_t *t;
-		sdg_join_t *a = (sdg_join_t*)s->joins, tmp, *r;
-		if (s->n_joins == SG_TREE_JOINS) { // then convert s->p to a tree
+		sdg_jpos_t *a = (sdg_jpos_t*)s->jpos, tmp, *r;
+		if (s->n_jpos == SG_TREE_JOINS) { // then convert s->p to a tree
 			t = kb_init(j, 512);
-			for (i = 0; i < s->n_joins; ++i) kb_putp(j, t, &a[i]);
-			free(s->joins);
-			s->joins = t;
-			s->m_joins = 0;
-		} else t = (jtree_t*)s->joins;
-		memset(&tmp, 0, sizeof(sdg_join_t));
+			for (i = 0; i < s->n_jpos; ++i) kb_putp(j, t, &a[i]);
+			free(s->jpos);
+			s->jpos = t;
+			s->m_jpos = 0;
+		} else t = (jtree_t*)s->jpos;
+		memset(&tmp, 0, sizeof(sdg_jpos_t));
 		tmp.sp = sp;
 		if ((r = kb_getp(j, t, &tmp)) == 0)
 			r = kb_putp(j, t, &tmp);
-		s->n_joins = kb_size(t);
+		s->n_jpos = kb_size(t);
 		return r;
 	}
 }
 
-sdg_join_t *sdg_s_get_join(const sdg_seq_t *s, int64_t sp)
+sdg_jpos_t *sdg_s_get_jpos(const sdg_seq_t *s, int64_t sp)
 {
-	if (s->n_joins <= SG_TREE_JOINS) {
+	if (s->n_jpos <= SG_TREE_JOINS) {
 		uint32_t i;
-		sdg_join_t *a = (sdg_join_t*)s->joins;
-		for (i = 0; i < s->n_joins; ++i)
+		sdg_jpos_t *a = (sdg_jpos_t*)s->jpos;
+		for (i = 0; i < s->n_jpos; ++i)
 			if (a[i].sp == sp) return &a[i];
 		return 0;
 	} else {
-		jtree_t *t = (jtree_t*)s->joins;
-		sdg_join_t tmp;
+		jtree_t *t = (jtree_t*)s->jpos;
+		sdg_jpos_t tmp;
 		tmp.sp = sp;
 		return kb_getp(j, t, &tmp);
 	}
@@ -80,8 +80,8 @@ void sdg_g_destroy(sdg_graph_t *g) // TODO
 	if (g == 0) return;
 	for (i = 0; i < g->n_seqs; ++i) {
 		sdg_seq_t *s = &g->seqs[i];
-		if (s->n_joins <= SG_TREE_JOINS) free(s->joins);
-		else kb_destroy(j, ((jtree_t*)s->joins));
+		if (s->n_jpos <= SG_TREE_JOINS) free(s->jpos);
+		else kb_destroy(j, ((jtree_t*)s->jpos));
 		free(s->name);
 	}
 	free(g->seqs);
@@ -118,8 +118,8 @@ sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len)
 
 void sdg_g_add_join1(sdg_graph_t *g, const sdg_side_t s1, const sdg_side_t s2)
 {
-	sdg_join_t *j;
-	j = sdg_s_add_side(&g->seqs[s1.id], s1.sp);
+	sdg_jpos_t *j;
+	j = sdg_s_add_jpos(&g->seqs[s1.id], s1.sp);
 	sdg_j_add_side(j, s2);
 }
 

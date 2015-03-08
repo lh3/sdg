@@ -25,14 +25,14 @@ typedef struct {
 		sdg_side_t nei;
 		sdg_side_t *neis;
 	} x;
-} sdg_join_t;
+} sdg_jpos_t;
 
 typedef struct {
 	int64_t id;  // sequence ID
 	int64_t len; // len<0 if length is not available
 	char *name;  // sequence name
-	uint32_t n_joins, m_joins;
-	void *joins; // an array if n_joins<SG_TREE_JOINS; otherwise a B-tree
+	uint32_t n_jpos, m_jpos;
+	void *jpos; // an array if n_jpos<SG_TREE_JOINS; otherwise a B-tree
 } sdg_seq_t;
 
 typedef struct {
@@ -54,16 +54,16 @@ extern "C" {
 	sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len);
 	int sdg_g_add_join(sdg_graph_t *g, const sdg_side_t s1, const sdg_side_t s2);
 
-	sdg_join_t *sdg_s_add_side(sdg_seq_t *s, int64_t sp);
-	sdg_join_t *sdg_s_get_join(const sdg_seq_t *s, int64_t sp);
+	sdg_jpos_t *sdg_s_add_jpos(sdg_seq_t *s, int64_t sp);
+	sdg_jpos_t *sdg_s_get_jpos(const sdg_seq_t *s, int64_t sp);
 
 #ifdef __cplusplus
 }
 #endif
 
-static inline void sdg_j_add_side(sdg_join_t *p, const sdg_side_t side)
+static inline void sdg_j_add_side(sdg_jpos_t *p, const sdg_side_t side)
 {
-	if (p->n_sides == 0) { // no joins
+	if (p->n_sides == 0) { // no jpos
 		p->n_sides = 1; p->m_sides = 0; p->x.nei = side;
 	} else if (p->n_sides == 1) { // one join; change to an array
 		sdg_side_t tmp = p->x.nei;
@@ -72,7 +72,7 @@ static inline void sdg_j_add_side(sdg_join_t *p, const sdg_side_t side)
 		p->x.neis[0] = tmp;
 		p->x.neis[1] = side;
 	} else {
-		if (p->n_sides == p->m_sides) { // multiple joins; simple append
+		if (p->n_sides == p->m_sides) { // multiple jpos; simple append
 			p->m_sides <<= 1;
 			p->x.neis = realloc(p->x.neis, p->m_sides * sizeof(sdg_side_t));
 		}
@@ -80,7 +80,7 @@ static inline void sdg_j_add_side(sdg_join_t *p, const sdg_side_t side)
 	}
 }
 
-static inline const sdg_side_t *sdg_j_get_side(const sdg_join_t *p, int i)
+static inline const sdg_side_t *sdg_j_get_side(const sdg_jpos_t *p, int i)
 {
 	if (p->n_sides == 1 && i == 0) return &p->x.nei;
 	return i > p->n_sides? 0 : &p->x.neis[i];
