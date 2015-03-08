@@ -55,7 +55,7 @@ sdg_graph_t *sdg_g_read(const char *fn)
 			s2 = read_side(p + 1, g, &p, &absent);
 			sdg_g_add_join(g, s1, s2);
 		} else if (str.s[0] == 'I') {
-			sdg_side_t s1, s2;
+			sdg_side_t s1, s2, s0;
 			for (q = p = str.s + 2; *p && *p != '\t'; ++p);
 			*p++ = 0; 
 			s = sdg_g_add_seq(g, q, &absent);
@@ -68,7 +68,10 @@ sdg_graph_t *sdg_g_read(const char *fn)
 			s2 = read_side(p + 1, g, &p, &absent);
 			if (absent && sdg_verbose >= 2)
 				fprintf(stderr, "WARNING: at line %ld, sequence '%s' was not added before.\n", (long)lineno, g->seqs[s2.id].name);
-			sdg_g_add_join(g, s1, s2);
+			s0.id = s->id, s0.sp = 0;
+			sdg_g_add_join(g, s0, s1);
+			s0.sp = s->len<<1 | 1;
+			sdg_g_add_join(g, s0, s2);
 		}
 	}
 	free(str.s);
@@ -100,6 +103,7 @@ void sdg_g_write(const sdg_graph_t *g, FILE *out)
 		kputl(s->len, &str);
 		kputsn("\t*\n", 3, &str);
 		fwrite(str.s, 1, str.l, out);
+		if (s->n_jpos == 0) continue;
 		itr = sdg_ji_first(s);
 		do { // traverse all join pos on $
 			sdg_jpos_t *p;
