@@ -19,7 +19,7 @@ typedef struct {
 } sdg_side_t;
 
 typedef struct {
-	int64_t sp;
+	int64_t sp; // stranded pos
 	uint32_t n_sides, m_sides;
 	union {
 		sdg_side_t nei;
@@ -45,17 +45,45 @@ typedef struct {
 extern "C" {
 #endif
 
+	// basic operations
+
 	sdg_graph_t *sdg_g_init(void);
 	void sdg_g_destroy(sdg_graph_t *g);
-
-	sdg_join_t *sdg_s_add_side(sdg_seq_t *s, int64_t sp);
 
 	int64_t sdg_g_get_seq_id(const sdg_graph_t *g, const char *name);
 	int64_t sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len);
 	int sdg_g_add_join(sdg_graph_t *g, const sdg_side_t s1, const sdg_side_t s2);
 
+	sdg_join_t *sdg_s_add_side(sdg_seq_t *s, int64_t sp);
+	sdg_join_t *sdg_s_get_join(const sdg_seq_t *s, int64_t sp);
+
 #ifdef __cplusplus
 }
 #endif
+
+static inline void sdg_j_add_side(sdg_join_t *p, const sdg_side_t side)
+{
+	if (p->n_sides == 0) { // no joins
+		p->n_sides = 1; p->m_sides = 0; p->x.nei = side;
+	} else if (p->n_sides == 1) { // one join; change to an array
+		sdg_side_t tmp = p->x.nei;
+		p->n_sides = p->m_sides = 2;
+		p->x.neis = malloc(p->m_sides * sizeof(sdg_side_t));
+		p->x.neis[0] = tmp;
+		p->x.neis[1] = side;
+	} else {
+		if (p->n_sides == p->m_sides) { // multiple joins; simple append
+			p->m_sides <<= 1;
+			p->x.neis = realloc(p->x.neis, p->m_sides * sizeof(sdg_side_t));
+		}
+		p->x.neis[p->n_sides++] = side;
+	}
+}
+
+static inline const sdg_side_t *sdg_j_get_side(const sdg_join_t *p, int i)
+{
+	if (p->n_sides == 1 && i == 0) return &p->x.nei;
+	return i > p->n_sides? 0 : &p->x.neis[i];
+}
 
 #endif

@@ -9,29 +9,10 @@
 KBTREE_INIT(j, sdg_join_t, join_cmp)
 typedef kbtree_t(j) jtree_t;
 
-static inline void sdg_j_append_side(sdg_join_t *p, const sdg_side_t side)
-{
-	if (p->n_sides == 0) { // no joins
-		p->n_sides = 1; p->m_sides = 0; p->x.nei = side;
-	} else if (p->n_sides == 1) { // one join; change to an array
-		sdg_side_t tmp = p->x.nei;
-		p->n_sides = p->m_sides = 2;
-		p->x.neis = malloc(p->m_sides * sizeof(sdg_side_t));
-		p->x.neis[0] = tmp;
-		p->x.neis[1] = side;
-	} else {
-		if (p->n_sides == p->m_sides) { // multiple joins; simple append
-			p->m_sides <<= 1;
-			p->x.neis = realloc(p->x.neis, p->m_sides * sizeof(sdg_side_t));
-		}
-		p->x.neis[p->n_sides++] = side;
-	}
-}
-
 sdg_join_t *sdg_s_add_side(sdg_seq_t *s, int64_t sp)
 {
+	uint32_t i;
 	if (s->n_joins < SG_TREE_JOINS) { // then s->p is an array
-		unsigned i;
 		sdg_join_t *a = (sdg_join_t*)s->joins;
 		for (i = 0; i < s->n_joins; ++i)
 			if (a[i].sp >= sp) break;
@@ -50,7 +31,6 @@ sdg_join_t *sdg_s_add_side(sdg_seq_t *s, int64_t sp)
 		jtree_t *t;
 		sdg_join_t *a = (sdg_join_t*)s->joins, tmp, *r;
 		if (s->n_joins == SG_TREE_JOINS) { // then convert s->p to a tree
-			unsigned i;
 			t = kb_init(j, 512);
 			for (i = 0; i < s->n_joins; ++i) kb_putp(j, t, &a[i]);
 			free(s->joins);
@@ -63,6 +43,22 @@ sdg_join_t *sdg_s_add_side(sdg_seq_t *s, int64_t sp)
 			r = kb_putp(j, t, &tmp);
 		s->n_joins = kb_size(t);
 		return r;
+	}
+}
+
+sdg_join_t *sdg_s_get_join(const sdg_seq_t *s, int64_t sp)
+{
+	if (s->n_joins <= SG_TREE_JOINS) {
+		uint32_t i;
+		sdg_join_t *a = (sdg_join_t*)s->joins;
+		for (i = 0; i < s->n_joins; ++i)
+			if (a[i].sp == sp) return &a[i];
+		return 0;
+	} else {
+		jtree_t *t = (jtree_t*)s->joins;
+		sdg_join_t tmp;
+		tmp.sp = sp;
+		return kb_getp(j, t, &tmp);
 	}
 }
 
@@ -124,7 +120,7 @@ void sdg_g_add_join1(sdg_graph_t *g, const sdg_side_t s1, const sdg_side_t s2)
 {
 	sdg_join_t *j;
 	j = sdg_s_add_side(&g->seqs[s1.id], s1.sp);
-	sdg_j_append_side(j, s2);
+	sdg_j_add_side(j, s2);
 }
 
 int sdg_g_add_join(sdg_graph_t *g, const sdg_side_t s1, const sdg_side_t s2)
