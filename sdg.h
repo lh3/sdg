@@ -46,6 +46,8 @@ typedef struct {
 struct sdg_ji_t;
 typedef struct sdg_ji_t sdg_ji_t;
 
+extern int sdg_verbose;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,7 +58,7 @@ extern "C" {
 	void sdg_g_destroy(sdg_graph_t *g);
 
 	sdg_seq_t *sdg_g_get_seq(const sdg_graph_t *g, const char *name);
-	sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name);
+	sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name, int *absent);
 	int sdg_g_add_join(sdg_graph_t *g, const sdg_side_t s1, const sdg_side_t s2);
 
 	sdg_jpos_t *sdg_s_get_jpos(const sdg_seq_t *s, int64_t sp);
@@ -75,7 +77,7 @@ extern "C" {
 }
 #endif
 
-static inline void sdg_j_add_side(sdg_jpos_t *p, const sdg_side_t side)
+static inline void sdg_j_add_side(sdg_jpos_t *p, const sdg_side_t side) // TODO: what if a side already exists?
 {
 	if (p->n_sides == 0) { // no jpos
 		p->n_sides = 1; p->m_sides = 0; p->x.nei = side;

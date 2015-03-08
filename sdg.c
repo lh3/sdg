@@ -4,6 +4,8 @@
 #include <zlib.h>
 #include "sdg.h"
 
+int sdg_verbose = 3;
+
 /*******************
  * jpos operations *
  *******************/
@@ -146,17 +148,18 @@ sdg_seq_t *sdg_g_get_seq(const sdg_graph_t *g, const char *name)
 	return k == kh_end(h)? 0 : &g->seqs[kh_val(h, k)];
 }
 
-sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name)
+sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name, int *absent)
 {
 	sdg_seq_t *s;
 	nhash_t *h = (nhash_t*)g->hash;
 	khint_t k;
-	int absent;
-	k = kh_put(n, h, name, &absent);
-	if (!absent) return &g->seqs[kh_val(h, k)]; // added before
+	k = kh_put(n, h, name, absent);
+	if (!*absent) return &g->seqs[kh_val(h, k)]; // added before
 	if (g->n_seqs == g->m_seqs) {
+		int64_t old_m = g->m_seqs;
 		g->m_seqs = g->m_seqs? g->m_seqs<<1 : 16;
 		g->seqs = realloc(g->seqs, g->m_seqs * sizeof(sdg_seq_t));
+		memset(g->seqs + old_m, 0, (g->m_seqs - old_m) * sizeof(sdg_seq_t));
 	}
 	s = &g->seqs[g->n_seqs++];
 	s->len = -1;
