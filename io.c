@@ -83,7 +83,7 @@ void sdg_g_write(const sdg_graph_t *g, FILE *out)
 			p = sdg_ji_at(itr);
 			for (j = 0; j < p->n_sides; ++j) { // traverse all sides involving $s->id:$p->sp
 				const sdg_side_t *d = sdg_j_get_side(p, j);
-				if (d->id < s->id || (d->id == s->id && d->sp < p->sp)) {
+				if (d->id < s->id || (d->id == s->id && d->sp > p->sp)) {
 					str.l = 0;
 					kputc('J', &str);
 					write_side(&str, g, s->id, p->sp);
