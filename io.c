@@ -7,8 +7,20 @@
 #include "kseq.h"
 KSEQ_INIT(gzFile, gzread)
 
-static inline sdg_side_t read_side()
+static inline sdg_side_t read_side(char *str, sdg_graph_t *g, char **r)
 {
+	char *q, *p;
+	sdg_seq_t *s;
+	sdg_side_t side;
+	for (q = p = str; *p && *p != '\t'; ++p);
+	*p++ = 0;
+	s = sdg_g_add_seq(g, q);
+	side.id = s->id;
+	side.sp = strtol(p, &p, 10) << 1;
+	if (*p == '-') side.sp |= 1;
+	++p;
+	*r = p;
+	return side;
 }
 
 sdg_graph_t *sdg_g_read(const char *fn)
@@ -36,18 +48,8 @@ sdg_graph_t *sdg_g_read(const char *fn)
 			if (s->len < 0 && x >= 0) s->len = x; // TODO: what if a sequence added twice with different lengths?
 		} else if (str.s[0] == 'J') {
 			sdg_side_t s1, s2;
-			for (q = p = str.s + 2; *p && *p != '\t'; ++p);
-			*p++ = 0; 
-			s = sdg_g_add_seq(g, q);
-			s1.id = s->id;
-			s1.sp = strtol(p, &p, 10) << 1;
-			if (*p == '-') s1.sp |= 1; // TODO: what if *p is neither '+' nor '-'
-			for (q = p = p + 2; *p && *p != '\t'; ++p);
-			*p++ = 0; 
-			s = sdg_g_add_seq(g, q);
-			s2.id = s->id;
-			s2.sp = strtol(p, &p, 10) << 1;
-			if (*p == '-') s2.sp |= 1; // TODO: what if *p is neither '+' nor '-'
+			s1 = read_side(str.s + 2, g, &p);
+			s2 = read_side(p + 1, g, &p);
 			sdg_g_add_join(g, s1, s2);
 		} else if (str.s[0] == 'I') {
 		}
