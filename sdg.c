@@ -29,6 +29,7 @@ sdg_jpos_t *sdg_s_add_jpos(sdg_seq_t *s, int64_t sp)
 				memmove(&a[i+1], &a[i], (s->n_jpos - i) * sizeof(sdg_jpos_t));
 			++s->n_jpos;
 			memset(&a[i], 0, sizeof(sdg_jpos_t));
+			a[i].sp = sp;
 		}
 		return &a[i];
 	} else { // then s->p is or will be a tree

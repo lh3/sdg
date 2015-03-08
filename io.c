@@ -43,7 +43,7 @@ sdg_graph_t *sdg_g_read(const char *fn)
 			s = sdg_g_add_seq(g, q);
 			s2.id = s->id;
 			s2.sp = strtol(p, &p, 10) << 1;
-			if (*p == '-') s1.sp |= 1; // TODO: what if *p is neither '+' nor '-'
+			if (*p == '-') s2.sp |= 1; // TODO: what if *p is neither '+' nor '-'
 			sdg_g_add_join(g, s1, s2);
 		}
 	}
