@@ -36,7 +36,7 @@ typedef struct {
 } sdg_seq_t;
 
 typedef struct {
-	int64_t n_seqs, m_seqs, max_rank;
+	int64_t n_seqs, m_seqs;
 	sdg_seq_t *seqs;
 	void *hash;
 } sdg_graph_t;
@@ -48,31 +48,14 @@ extern "C" {
 	sdg_graph_t *sdg_g_init(void);
 	void sdg_g_destroy(sdg_graph_t *g);
 
-	int64_t sdg_s_getid(const sdg_graph_t *g, const char *name);
-	int64_t sdg_s_add(sdg_graph_t *g, const char *name, int64_t len);
-	int64_t sdg_j_add(sdg_graph_t *g, sdg_side_t s1, sdg_side_t s2);
+	sdg_join_t *sdg_s_add_side(sdg_seq_t *s, int64_t sp);
+
+	int64_t sdg_g_get_seq_id(const sdg_graph_t *g, const char *name);
+	int64_t sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len);
+	int sdg_g_add_join(sdg_graph_t *g, const sdg_side_t s1, const sdg_side_t s2);
 
 #ifdef __cplusplus
 }
 #endif
-
-static inline void sdg_j_append_side(sdg_join_t *p, sdg_side_t side)
-{
-	if (p->n_sides == 0) { // no joins
-		p->n_sides = 1; p->m_sides = 0; p->x.nei = side;
-	} else if (p->n_sides == 1) { // one join; change to an array
-		sdg_side_t tmp = p->x.nei;
-		p->n_sides = p->m_sides = 2;
-		p->x.neis = malloc(p->m_sides * sizeof(sdg_side_t));
-		p->x.neis[0] = tmp;
-		p->x.neis[1] = side;
-	} else {
-		if (p->n_sides == p->m_sides) { // multiple joins; simple append
-			p->m_sides <<= 1;
-			p->x.neis = realloc(p->x.neis, p->m_sides * sizeof(sdg_side_t));
-		}
-		p->x.neis[p->n_sides++] = side;
-	}
-}
 
 #endif

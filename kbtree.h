@@ -185,14 +185,16 @@ typedef struct {
 		__KB_KEY(key_t, x)[i] = __KB_KEY(key_t, y)[b->t - 1];			\
 		++x->n;															\
 	}																	\
-	static void __kb_putp_aux_##name(kbtree_##name##_t *b, kbnode_t *x, const key_t * __restrict k) \
+	static key_t *__kb_putp_aux_##name(kbtree_##name##_t *b, kbnode_t *x, const key_t * __restrict k) \
 	{																	\
 		int i = x->n - 1;												\
+		key_t *ret;														\
 		if (x->is_internal == 0) {										\
 			i = __kb_getp_aux_##name(x, k, 0);							\
 			if (i != x->n - 1)											\
 				memmove(__KB_KEY(key_t, x) + i + 2, __KB_KEY(key_t, x) + i + 1, (x->n - i - 1) * sizeof(key_t)); \
-			__KB_KEY(key_t, x)[i + 1] = *k;								\
+			ret = &__KB_KEY(key_t, x)[i + 1];							\
+			*ret = *k;													\
 			++x->n;														\
 		} else {														\
 			i = __kb_getp_aux_##name(x, k, 0) + 1;						\
@@ -200,10 +202,11 @@ typedef struct {
 				__kb_split_##name(b, x, i, __KB_PTR(b, x)[i]);			\
 				if (__cmp(*k, __KB_KEY(key_t, x)[i]) > 0) ++i;			\
 			}															\
-			__kb_putp_aux_##name(b, __KB_PTR(b, x)[i], k);				\
+			ret = __kb_putp_aux_##name(b, __KB_PTR(b, x)[i], k);		\
 		}																\
+		return ret; 													\
 	}																	\
-	static void kb_putp_##name(kbtree_##name##_t *b, const key_t * __restrict k) \
+	static key_t *kb_putp_##name(kbtree_##name##_t *b, const key_t * __restrict k) \
 	{																	\
 		kbnode_t *r, *s;												\
 		++b->n_keys;													\
@@ -216,7 +219,7 @@ typedef struct {
 			__kb_split_##name(b, s, 0, r);								\
 			r = s;														\
 		}																\
-		__kb_putp_aux_##name(b, r, k);									\
+		return __kb_putp_aux_##name(b, r, k);							\
 	}																	\
 	static inline void kb_put_##name(kbtree_##name##_t *b, const key_t k) \
 	{																	\
