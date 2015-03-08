@@ -1,6 +1,8 @@
 #ifndef SIDEGRAPH_H
 #define SIDEGRAPH_H
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 
 #ifndef kroundup64
@@ -54,7 +56,7 @@ extern "C" {
 	void sdg_g_destroy(sdg_graph_t *g);
 
 	sdg_seq_t *sdg_g_get_seq(const sdg_graph_t *g, const char *name);
-	sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len);
+	sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name);
 	int sdg_g_add_join(sdg_graph_t *g, const sdg_side_t s1, const sdg_side_t s2);
 
 	sdg_jpos_t *sdg_s_get_jpos(const sdg_seq_t *s, int64_t sp);
@@ -63,6 +65,11 @@ extern "C" {
 	sdg_ji_t *sdg_ji_first(sdg_seq_t *s);
 	int sdg_ji_next(sdg_ji_t *itr);
 	sdg_jpos_t *sdg_ji_at(sdg_ji_t *itr);
+
+	// I/O
+
+	sdg_graph_t *sdg_g_read(const char *fn);
+	void sdg_g_write(const sdg_graph_t *g, FILE *out);
 
 #ifdef __cplusplus
 }

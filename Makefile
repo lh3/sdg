@@ -4,14 +4,17 @@ CPPFLAGS=
 INCLUDES=	
 OBJS=		sdg.o io.o
 PROG=		sdg
-LIBS=		-lm -lz
+LIBS=		-lz
 
 .SUFFIXES:.c .o
 
 .c.o:
 		$(CC) -c $(CFLAGS) $(CPPFLAGS) $(INCLUDES) $< -o $@
 
-all:sdg.o io.o
+all:$(PROG)
+
+sdg:$(OBJS) cmd.o
+		$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 clean:
 		rm -fr gmon.out *.o ext/*.o a.out $(PROG) *~ *.a *.dSYM session*

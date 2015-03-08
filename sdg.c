@@ -145,7 +145,7 @@ sdg_seq_t *sdg_g_get_seq(const sdg_graph_t *g, const char *name)
 	return k == kh_end(h)? 0 : &g->seqs[kh_val(h, k)];
 }
 
-sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len)
+sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name)
 {
 	sdg_seq_t *s;
 	nhash_t *h = (nhash_t*)g->hash;
@@ -158,7 +158,7 @@ sdg_seq_t *sdg_g_add_seq(sdg_graph_t *g, const char *name, int64_t len)
 		g->seqs = realloc(g->seqs, g->m_seqs * sizeof(sdg_seq_t));
 	}
 	s = &g->seqs[g->n_seqs++];
-	s->len = len;
+	s->len = -1;
 	kh_key(h, k) = s->name = strdup(name);
 	kh_val(h, k) = s->id   = g->n_seqs - 1;
 	return s;
