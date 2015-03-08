@@ -324,9 +324,10 @@ typedef struct {
 	{ \
 		itr->p = itr->stack; \
 		itr->p->x = b->root; itr->p->i = 0; \
-		while (__KB_PTR(b, itr->p->x)[0] != 0) { \
+		while (itr->p->x->is_internal && __KB_PTR(b, itr->p->x)[0] != 0) { \
+			kbnode_t *x = itr->p->x; \
 			++itr->p; \
-			itr->p->x = __KB_PTR(b, itr->p->x)[0]; itr->p->i = 0; \
+			itr->p->x = __KB_PTR(b, x)[0]; itr->p->i = 0; \
 		} \
 	} \
 	static int kb_itr_get_##name(kbtree_##name##_t *b, const key_t * __restrict k, kbitr_t *itr) \
