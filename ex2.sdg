@@ -1,3 +1,11 @@
-S	R	100	*
-I	A	2	R	10-	R	12+
-J	R	20-	R	23+
+# This is the same as ex1.sdg but with a different line order.
+S	R1	100	*
+J	R1	20-	R1	23+
+J	R2	30+	R1	50-
+J	A	0+	R1	10-
+J	B	0+	A	0-
+J	B	1-	R1	14+
+S	R2	120	*
+S	A	2	*
+J	A	1-	R1	12+
+S	B	2	*
