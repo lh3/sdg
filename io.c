@@ -7,6 +7,10 @@
 #include "kseq.h"
 KSEQ_INIT(gzFile, gzread)
 
+static inline sdg_side_t read_side()
+{
+}
+
 sdg_graph_t *sdg_g_read(const char *fn)
 {
 	gzFile fp;
@@ -45,6 +49,7 @@ sdg_graph_t *sdg_g_read(const char *fn)
 			s2.sp = strtol(p, &p, 10) << 1;
 			if (*p == '-') s2.sp |= 1; // TODO: what if *p is neither '+' nor '-'
 			sdg_g_add_join(g, s1, s2);
+		} else if (str.s[0] == 'I') {
 		}
 	}
 	free(str.s);
