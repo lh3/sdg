@@ -23,7 +23,7 @@ typedef struct {
 typedef struct {
 	int64_t sp; // stranded pos
 	uint32_t n_sides, m_sides;
-	union {
+	union {     // if $n_sides==1, we use x.nei; otherwise, use x.neis[]
 		sdg_side_t nei;
 		sdg_side_t *neis;
 	} x;
@@ -34,13 +34,13 @@ typedef struct {
 	int64_t len; // len<0 if length is not available
 	char *name;  // sequence name
 	uint32_t n_jpos, m_jpos;
-	void *jpos; // an array if n_jpos<SG_TREE_JOINS; otherwise a B-tree
+	void *jpos;  // an array if n_jpos<SG_TREE_JOINS; otherwise a B-tree
 } sdg_seq_t;
 
 typedef struct {
 	int64_t n_seqs, m_seqs;
 	sdg_seq_t *seqs;
-	void *hash;
+	void *hash;  // translate name strings to integer ids
 } sdg_graph_t;
 
 struct sdg_ji_t;
@@ -63,6 +63,8 @@ extern "C" {
 
 	sdg_jpos_t *sdg_s_get_jpos(const sdg_seq_t *s, int64_t sp);
 	sdg_jpos_t *sdg_s_add_jpos(sdg_seq_t *s, int64_t sp);
+
+	// jpos iterator
 
 	sdg_ji_t *sdg_ji_first(sdg_seq_t *s);
 	int sdg_ji_next(sdg_ji_t *itr);
