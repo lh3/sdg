@@ -1,3 +1,7 @@
-S	R	100	*
-I	A	2	R	10-	R	12+
-J	R	20-	R	23+
+# Another way to write the ex1.sdg graph using "I".
+S	R1	100
+S	R2	120
+J	R1	50>	R2	30<
+I	A	2	R1	10>	R1	12<
+J	R1	20>	R1	23<
+I	B	2	A	0>	R1	14<

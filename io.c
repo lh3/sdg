@@ -17,7 +17,7 @@ static inline sdg_side_t read_side(char *str, sdg_graph_t *g, char **r, int *abs
 	s = sdg_g_add_seq(g, q, absent);
 	side.id = s->id;
 	side.sp = strtol(p, &p, 10) << 1;
-	if (*p == '-') side.sp |= 1;
+	if (*p == '>') side.sp |= 1;
 	++p;
 	*r = p;
 	return side;
@@ -86,7 +86,7 @@ static inline void write_side(kstring_t *s, const sdg_graph_t *g, int64_t id, in
 	kputs(g->seqs[id].name, s);
 	kputc('\t', s);
 	kputl(sp>>1, s);
-	kputc("+-"[sp&1], s);
+	kputc("<>"[sp&1], s);
 }
 
 void sdg_g_write(const sdg_graph_t *g, FILE *out)
@@ -101,7 +101,7 @@ void sdg_g_write(const sdg_graph_t *g, FILE *out)
 		kputs(s->name, &str);
 		kputc('\t', &str);
 		kputl(s->len, &str);
-		kputsn("\t*\n", 3, &str);
+		kputc('\n', &str);
 		fwrite(str.s, 1, str.l, out);
 		if (s->n_jpos == 0) continue;
 		itr = sdg_ji_first(s);

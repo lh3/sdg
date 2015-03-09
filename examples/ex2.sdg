@@ -1,12 +1,13 @@
 # This is the same as ex1.sdg but with a different line order.
-# The `sdg reformat` output is the same.
-J	R1	20-	R1	23+
-S	R1	100	*
-J	R2	30+	R1	50-
-J	A	0+	R1	10-
-J	B	0+	A	0-
-J	B	1-	R1	14+
-S	R2	120	*
-S	A	2	*
-J	A	1-	R1	12+
+# The `sdg reformat ex2.sdg` output is the same as ex1.sdg.
+S	R1	100
+J	R1	50>	R2	30<
+J	R1	10>	A	0<
+S	A	2
+J	A	1>	R1	12<
+J	R1	20>	R1	23<
 S	B	2	*
+J	A	0>	B	0<
+J	B	1>	R1	14<
+J	R1	20>	R1	23<
+S	R2	120
