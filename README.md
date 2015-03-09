@@ -20,7 +20,7 @@ J    R1   50>   R2   30<   # translocation
 S    A    2                # a MNP on R1
 J    R1   10>   A    0<
 J    A    1>    R1   12<
-S    B    2     *
+S    B    2
 J    A    0>    B    0<
 J    B    1>    R1   14<
 ```
