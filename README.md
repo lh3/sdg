@@ -21,7 +21,7 @@ S    A    2                # a MNP on R1
 J    R1   10>   A    0<
 J    A    1>    R1   12<
 S    B    2
-J    A    0>    B    0<
+J    A    1>    B    0<
 J    B    1>    R1   14<
 ```
 where a "Sequence" line gives the sequence name and length and a "Join" line
@@ -36,7 +36,7 @@ S    R2  120
 J    R1  20>   R1   23<
 J    R1  50>   R2   30<
 I    A   2     R1   10>   R1    12<
-I    B   2     A    0>    R1    14<
+I    B   2     A    1>    R1    14<
 ```
 The reformat of this graph is the same as the first example.
 
