@@ -70,7 +70,7 @@ sdg_graph_t *sdg_g_read(const char *fn)
 				fprintf(stderr, "WARNING: at line %ld, sequence '%s' was not added before.\n", (long)lineno, g->seqs[s2.id].name);
 			s0.id = s->id, s0.sp = 0;
 			sdg_g_add_join(g, s0, s1);
-			s0.sp = s->len<<1 | 1;
+			s0.sp = (s->len-1)<<1 | 1;
 			sdg_g_add_join(g, s0, s2);
 		}
 	}
