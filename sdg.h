@@ -1,6 +1,12 @@
 #ifndef SIDEGRAPH_H
 #define SIDEGRAPH_H
 
+/*
+ * A graph (sdg_graph_t) consists of sequences (sdg_seq_t). A sequence consists
+ * of join positions (sdg_jpos_t). These are sides on this sequence that
+ * involved in joins. The adjacent sides are kept in sdg_jpos_t::{nei,neis}.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

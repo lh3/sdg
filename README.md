@@ -43,6 +43,6 @@ The reformat of this graph is the same as the first example.
 ### Performance
 
 So far, the reformat tool has only been tested on toy examples. It probably has
-bugs that may show up on other examples. Nonetheless, the underlying
+bugs that may show up on other graphs. Nonetheless, the underlying
 implementation is very efficient and should work with huge real-world graphs in
 principle.
