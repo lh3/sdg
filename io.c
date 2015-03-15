@@ -9,17 +9,28 @@ KSEQ_INIT(gzFile, gzread)
 
 static inline sdg_side_t read_side(char *str, sdg_graph_t *g, char **r, int *absent)
 {
-	char *q, *p;
-	sdg_seq_t *s;
+	char *q, *p, *t = 0;
 	sdg_side_t side;
+
+	side.id = -2, side.sp = -1;
 	for (q = p = str; *p && *p != '\t'; ++p);
-	*p++ = 0;
-	s = sdg_g_add_seq(g, q, absent);
-	side.id = s->id;
-	side.sp = strtol(p, &p, 10) << 1;
-	if (*p == '>') side.sp |= 1;
-	++p;
 	*r = p;
+	*p = 0;
+	if (p - q == 2 && *q == ':' && *(q+1) == ':') { // empty side
+		side.id = -1, side.sp = -1;
+	} else if (p - q >= 3 && *(p-1) == ':' && *(p-2) == ':') { // side involved in an epsilon sequence
+		*(p-2) = 0;
+		t = q;
+	} else if (p - q >= 5 && *(p-2) == ':' && (*(p-1) == '5' || *(p-1) == '3')) {
+		int is3 = (*(p-1) == '3');
+		for (p -= 3; p >= q && isdigit(*p); --p);
+		if (p > q && *p == ':') {
+			*p = 0;
+			side.sp = strtol(p + 1, &p, 10) << 1 | is3;
+			t = q;
+		}
+	}
+	if (t) side.id = sdg_g_add_seq(g, t, absent)->id;
 	return side;
 }
 
@@ -53,7 +64,7 @@ sdg_graph_t *sdg_g_read(const char *fn)
 			sdg_side_t s1, s2;
 			s1 = read_side(str.s + 2, g, &p, &absent);
 			s2 = read_side(p + 1, g, &p, &absent);
-			sdg_g_add_join(g, s1, s2);
+			if (s1.id >= 0 && s2.id >= 0) sdg_g_add_join(g, s1, s2);
 		} else if (str.s[0] == 'I') {
 			sdg_side_t s1, s2, s0;
 			for (q = p = str.s + 2; *p && *p != '\t'; ++p);
@@ -68,10 +79,15 @@ sdg_graph_t *sdg_g_read(const char *fn)
 			s2 = read_side(p + 1, g, &p, &absent);
 			if (absent && sdg_verbose >= 2)
 				fprintf(stderr, "WARNING: at line %ld, sequence '%s' was not added before.\n", (long)lineno, g->seqs[s2.id].name);
-			s0.id = s->id, s0.sp = 0;
-			sdg_g_add_join(g, s0, s1);
-			s0.sp = (s->len-1)<<1 | 1;
-			sdg_g_add_join(g, s0, s2);
+			s0.id = s->id;
+			if (s1.id >= 0) {
+				s0.sp = 0;
+				sdg_g_add_join(g, s0, s1);
+			}
+			if (s2.id >= 0) {
+				s0.sp = (s->len-1)<<1 | 1;
+				sdg_g_add_join(g, s0, s2);
+			}
 		}
 	}
 	free(str.s);
@@ -84,9 +100,10 @@ static inline void write_side(kstring_t *s, const sdg_graph_t *g, int64_t id, in
 {
 	kputc('\t', s);
 	kputs(g->seqs[id].name, s);
-	kputc('\t', s);
+	kputc(':', s);
 	kputl(sp>>1, s);
-	kputc("<>"[sp&1], s);
+	kputc(':', s);
+	kputc("53"[sp&1], s);
 }
 
 void sdg_g_write(const sdg_graph_t *g, FILE *out)
