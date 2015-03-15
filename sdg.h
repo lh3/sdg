@@ -91,11 +91,16 @@ static inline void sdg_j_add_side(sdg_jpos_t *p, const sdg_side_t side) // TODO:
 		p->n_sides = 1; p->m_sides = 0; p->x.nei = side;
 	} else if (p->n_sides == 1) { // one join; change to an array
 		sdg_side_t tmp = p->x.nei;
+		if (side.id == tmp.id && side.sp == tmp.sp) return; // already exist
 		p->n_sides = p->m_sides = 2;
 		p->x.neis = malloc(p->m_sides * sizeof(sdg_side_t));
 		p->x.neis[0] = tmp;
 		p->x.neis[1] = side;
 	} else {
+		int i;
+		for (i = 0; i < p->n_sides; ++p)
+			if (side.id == p->x.neis[i].id && side.sp == p->x.neis[i].sp)
+				return;
 		if (p->n_sides == p->m_sides) { // multiple jpos; simple append
 			p->m_sides <<= 1;
 			p->x.neis = realloc(p->x.neis, p->m_sides * sizeof(sdg_side_t));
