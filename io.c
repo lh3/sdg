@@ -12,15 +12,14 @@ static inline sdg_side_t read_side(char *str, sdg_graph_t *g, char **r, int *abs
 	char *q, *p, *t = 0;
 	sdg_side_t side;
 
-	side.id = -2, side.sp = -1;
+	side.id = -2, side.sp = -1, *absent = 0;
 	for (q = p = str; *p && *p != '\t'; ++p);
 	*r = p;
 	*p = 0;
 	if (p - q == 2 && *q == ':' && *(q+1) == ':') { // empty side
-		side.id = -1, side.sp = -1;
+		side.id = -1;
 	} else if (p - q >= 3 && *(p-1) == ':' && *(p-2) == ':') { // side involved in an epsilon sequence
-		*(p-2) = 0;
-		t = q;
+		*(p-2) = 0, t = q;
 	} else if (p - q >= 5 && *(p-2) == ':' && (*(p-1) == '5' || *(p-1) == '3')) {
 		int is3 = (*(p-1) == '3');
 		for (p -= 3; p >= q && isdigit(*p); --p);
@@ -85,7 +84,7 @@ sdg_graph_t *sdg_g_read(const char *fn)
 				sdg_g_add_join(g, s0, s1);
 			}
 			if (s2.id >= 0) {
-				s0.sp = (s->len-1)<<1 | 1;
+				s0.sp = s->len == 0? 1 : (s->len-1)<<1 | 1;
 				sdg_g_add_join(g, s0, s2);
 			}
 		}
